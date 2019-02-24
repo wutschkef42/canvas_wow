@@ -65,14 +65,9 @@ canvas.backgroundColor = 'rgb(150,150,150)';
 var path = fabric.loadSVGFromString(svgStr, function(objects, options) {
   console.log(objects)
   var obj = fabric.util.groupSVGElements(objects, options);
-  obj.scaleToHeight(canvas.height / 2.5)
-      .set({angle: -10}) // try changing the angle you will see it rotates around a bad origin
+  obj.scaleToHeight(canvas.height - 40)
+      .set({top: canvas.height / 2, left: canvas.height / 2, angle: 0, originX: 'center', originY: 'center',}) // try changing the angle you will see it rotates around a bad origin
       .setCoords();
 
   canvas.add(obj).renderAll();
-})
-
-
-
-
-
+});
