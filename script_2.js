@@ -6,7 +6,7 @@ const svgEl = document.querySelector('svg');
 const canvas = new fabric.Canvas('c');
 
 /*
-** calculate linear grayscale 
+** calculate linear grayscale
 ** @i element index
 ** @n number of elements
 */
@@ -83,31 +83,33 @@ function spin() {
 
 }
 
+const onClick = obj => () => {
+  obj.animate('angle', 3000, {
+    onChange: canvas.renderAll.bind(canvas),
+    duration: 10000,
+    easing: fabric.util.ease.easeInOutCubic
+  });
+}
+
 // load svg into fabricjs
 var serializer = new XMLSerializer();
 var svgStr = serializer.serializeToString(svgEl);
-var path = fabric.loadSVGFromString(svgStr, function(objects, options) {
+var path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
   var obj = fabric.util.groupSVGElements(objects, options)
                         .scaleToHeight(canvas.height - 40)
                         .set({
                           top: canvas.height / 2,
                           left: canvas.height / 2,
                           originX: 'center', originY: 'center'});
-  
+
   canvas.add(circle_4)
   canvas.add(obj).renderAll();
   canvas.add(circle, circle_2, circle_3, triangle)
-  
-  obj.animate('angle', 3000, {
-    onChange: canvas.renderAll.bind(canvas),
-    duration: 10000,
-    easing: fabric.util.ease.easeInOutCubic
-  }); 
-  
+
+
+  const button = document.getElementById('relance');
+  button.addEventListener("click", onClick(obj))
+
 });
 
 console.log(path);
-
-
-
-
