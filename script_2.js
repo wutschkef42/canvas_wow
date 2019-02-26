@@ -83,12 +83,16 @@ function spin() {
 
 }
 
+let rotate = 3000;
+
 const onClick = obj => () => {
-  obj.animate('angle', 3000 + Math.random() * 360 + obj.get('angle'), {
+  obj.animate('angle', rotate, {
     onChange: canvas.renderAll.bind(canvas),
     duration: 6000,
     easing: fabric.util.ease.easeInOutCubic
   });
+
+  rotate += 3000 + Math.random() * 360 ;
 }
 
 // load svg into fabricjs
