@@ -84,9 +84,9 @@ function spin() {
 }
 
 const onClick = obj => () => {
-  obj.animate('angle', 3000, {
+  obj.animate('angle', 3000 + Math.random() * 360 + obj.get('angle'), {
     onChange: canvas.renderAll.bind(canvas),
-    duration: 10000,
+    duration: 6000,
     easing: fabric.util.ease.easeInOutCubic
   });
 }
@@ -103,13 +103,13 @@ var path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
                           originX: 'center', originY: 'center'});
 
   canvas.add(circle_4)
+
+  
   canvas.add(obj).renderAll();
   canvas.add(circle, circle_2, circle_3, triangle)
 
-
   const button = document.getElementById('relance');
   button.addEventListener("click", onClick(obj))
-
 });
 
 console.log(path);
