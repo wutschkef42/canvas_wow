@@ -2,3 +2,32 @@ svg {
     display: none;
     height: 400px;
   }
+
+  
+
+#relance {
+    background-color: black;
+    color: white;
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold;
+    font-weight: 'helvetica';
+    letter-spacing: 1.5px;
+    margin-top: 20px;
+}
+
+#container {
+    display: flex;           /* establish flex container */
+    flex-direction: column;  /* make main axis vertical */
+    justify-content: center; /* center items vertically, in this case */
+    align-items: center;     /* center items horizontally, in this case */
+    height: 600px;
+}
+
+
+
+.box {
+    width: 300px;
+    margin: 5px;
+    text-align: center;     /* will center text in <p>, which is not a flex item */
+}

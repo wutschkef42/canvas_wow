@@ -58,16 +58,56 @@ generateSlices(8).forEach(slice => {
 });
 
 
+var circle = new fabric.Circle({
+  radius: 70, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+});
+
+var circle_2 = new fabric.Circle({
+  radius: 60, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+});
+
+var circle_3 = new fabric.Circle({
+  radius: 50, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+});
+
+var circle_4 = new fabric.Circle({
+  radius: 242, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+});
+
+var triangle = new fabric.Triangle({
+  width: 30, height: 38, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2, top: 25, angle: 180, stroke: 'white', strokeWidth: 4
+});
+
+
+function spin() {
+
+}
+
 // load svg into fabricjs
 var serializer = new XMLSerializer();
 var svgStr = serializer.serializeToString(svgEl);
-canvas.backgroundColor = 'rgb(150,150,150)';
 var path = fabric.loadSVGFromString(svgStr, function(objects, options) {
-  console.log(objects)
-  var obj = fabric.util.groupSVGElements(objects, options);
-  obj.scaleToHeight(canvas.height - 40)
-      .set({top: canvas.height / 2, left: canvas.height / 2, angle: 0, originX: 'center', originY: 'center',}) // try changing the angle you will see it rotates around a bad origin
-      .setCoords();
-
+  var obj = fabric.util.groupSVGElements(objects, options)
+                        .scaleToHeight(canvas.height - 40)
+                        .set({
+                          top: canvas.height / 2,
+                          left: canvas.height / 2,
+                          originX: 'center', originY: 'center'});
+  
+  canvas.add(circle_4)
   canvas.add(obj).renderAll();
+  canvas.add(circle, circle_2, circle_3, triangle)
+  
+  obj.animate('angle', 3000, {
+    onChange: canvas.renderAll.bind(canvas),
+    duration: 10000,
+    easing: fabric.util.ease.easeInOutCubic
+  }); 
+  
 });
+
+console.log(path);
+
+
+
+
