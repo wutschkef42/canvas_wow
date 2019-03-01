@@ -1,4 +1,27 @@
+/*
+** CONFIGURATION
+** ====================================================================================================
+** @sliceColors: default to gray scale, optionally replace with array of custom colors ['#ffffff', ...]
+** @sliceLabels: labels on slices
+** @dotColors: colors of the dots inside each slice 
+**
+** sliceColors.length == sliceLabels.length == dotColors.length == wheelSize !! otherwise TypeError
+** ====================================================================================================
+*/
 
+const wheelSize = 9; // number of slices in the wheel
+
+const config = {
+  slices: generateSlices(wheelSize),
+  sliceColors: new Array(wheelSize).fill('').map((_, i) => (getGrayscale(i + 1, wheelSize))),
+  sliceLabels: ['blabla', 'italian', 'mexican', 'thai', 'french', 'korean', 'chinese', 'american', 'japanese'],
+  dotColors: ['#4286f4', '#92ea3a', '#e83594', '#9530dd', '#f7e525', '#221cdb', '#e5a43b', '#3be57c', '#92ea3a'],
+}
+
+
+
+
+const offsetHalfSlice = 360 / (wheelSize * 2)
 const svgEl = document.querySelector('svg');
 const canvas = new fabric.Canvas('c');
 
@@ -17,9 +40,13 @@ function getGrayscale(i, n) {
 */
 
 function generateSlices(n) {
-  return ((new Array(n).fill({})).map((el, i) => (
-    { percent: 1 / n, color: getGrayscale(i + 1, n) })));
+  return ((new Array(n).fill({})).map((_, i) => (
+    { percent: 1 / n })));
 }
+
+/*
+** convert degrees to radians
+*/
 
 Math.radians = function(degrees) {
   return degrees * Math.PI / 180;
@@ -50,7 +77,7 @@ function getCoordinatesForAngle(radius, angle) {
 */
 
 let cumulativePercent = 0;
-generateSlices(8).forEach(slice => {
+config.slices.forEach((slice, i) => {
   const [startX, startY] = getCoordinatesForPercent(cumulativePercent);
   cumulativePercent += slice.percent;
   const [endX, endY] = getCoordinatesForPercent(cumulativePercent);
@@ -64,7 +91,7 @@ generateSlices(8).forEach(slice => {
 
   const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   pathEl.setAttribute('d', pathData);
-  pathEl.setAttribute('fill', slice.color);
+  pathEl.setAttribute('fill', config.sliceColors[i]);
   pathEl.setAttribute('stroke', 'white');
   pathEl.setAttribute('stroke-width', 0.04);
   svgEl.appendChild(pathEl);
@@ -78,12 +105,12 @@ generateSlices(8).forEach(slice => {
 
 function generateDotsAndLabels(n) {
   let objs = []
-  let colors = ['#4286f4', '#92ea3a', '#e83594', '#9530dd', '#f7e525', '#221cdb', '#e5a43b', '#3be57c']
-  let labels = ['italian', 'mexican', 'thai', 'french', 'korean', 'chinese', 'american', 'japanese']
+  let colors = config.dotColors
+  let labels = config.sliceLabels
   for (let i = 0; i < n; i++) {
-    let [posX, posY] = getCoordinatesForAngle(90, 22.5 + i/n * 360)
-    let [posXLabel, posYLabel] = getCoordinatesForAngle(160, 22.5 + i/n * 360)
-    let circle = new fabric.Circle({
+    let [posX, posY] = getCoordinatesForAngle(90, offsetHalfSlice + i/n * 360)
+    let [posXLabel, posYLabel] = getCoordinatesForAngle(160, offsetHalfSlice + i/n * 360)
+    let dot = new fabric.Circle({
       radius: 12,
       fill: colors[i],
       originX: 'center',
@@ -97,12 +124,12 @@ function generateDotsAndLabels(n) {
       originY: 'center',
       left: canvas.width/2 + posXLabel,
       top: canvas.height/2 + posYLabel,
-      angle: i/n * 360 + 22.5,
+      angle: i/n * 360 + offsetHalfSlice,
       fontFamily: 'Helvetica',
       fontSize: 12,
       fontWeight: 'bold'
     })
-    objs.push(circle)
+    objs.push(dot)
     objs.push(label)
   }
   return (objs);
@@ -115,54 +142,52 @@ const onClick = obj => () => {
     duration: 6000,
     easing: fabric.util.ease.easeInOutCubic
   });
-
   rotate += 1500 + Math.random() * 360 ;
-  console.log(rotate % 360)
 }
 
 /* circles for the center of the wheel */
 
-var circle_inner_outer_white = new fabric.Circle({
+const circleInnerOuterWhite = new fabric.Circle({
   radius: 70, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
 });
 
-var circle_inner_black = new fabric.Circle({
+const circleInnerBlack = new fabric.Circle({
   radius: 60, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
 });
 
-var circle_inner_white = new fabric.Circle({
+const circleInnerWhite = new fabric.Circle({
   radius: 50, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
 });
 
-var circle_outer_black = new fabric.Circle({
+const circleOuterBlack = new fabric.Circle({
   radius: 242, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
 });
 
-var triangle = new fabric.Triangle({
+const triangle = new fabric.Triangle({
   width: 30, height: 38, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2, top: 25, angle: 180, stroke: 'white', strokeWidth: 4
 });
 
 /* load wheel svg into fabric */
 
-var serializer = new XMLSerializer();
-var svgStr = serializer.serializeToString(svgEl);
-var path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
-  var obj = fabric.util.groupSVGElements(objects, options)
+const serializer = new XMLSerializer();
+const svgStr = serializer.serializeToString(svgEl);
+const path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
+  const obj = fabric.util.groupSVGElements(objects, options)
                         .scaleToHeight(canvas.height - 40)
                         .set({
                           top: canvas.height / 2,
                           left: canvas.height / 2,
                           originX: 'center', originY: 'center'});
 
-  canvas.add(circle_outer_black)
-  let dotLabelObjs = generateDotsAndLabels(8)
+  canvas.add(circleOuterBlack)
+  const dotLabelObjs = generateDotsAndLabels(wheelSize)
   dotLabelObjs.unshift(obj)
-  var motionGroupObj = new fabric.Group(dotLabelObjs,{
+  const motionGroupObj = new fabric.Group(dotLabelObjs,{
                             originX: 'center', originY: 'center'
   });
 
   canvas.add(motionGroupObj).renderAll();
-  canvas.add(circle_inner_outer_white, circle_inner_black, circle_inner_white, triangle)
+  canvas.add(circleInnerOuterWhite, circleInnerBlack, circleInnerWhite, triangle)
   const button = document.getElementById('relance');
   button.addEventListener("click", onClick(motionGroupObj))
 });
