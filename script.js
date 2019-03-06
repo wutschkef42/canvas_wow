@@ -9,20 +9,31 @@
 ** ====================================================================================================
 */
 
-const wheelSize = 9; // number of slices in the wheel
+const wheelSize = 8; // number of slices in the wheel
 
 const config = {
   slices: generateSlices(wheelSize),
   sliceColors: new Array(wheelSize).fill('').map((_, i) => (getGrayscale(i + 1, wheelSize))),
-  sliceLabels: ['blabla', 'italian', 'mexican', 'thai', 'french', 'korean', 'chinese', 'american', 'japanese'],
-  dotColors: ['#4286f4', '#92ea3a', '#e83594', '#9530dd', '#f7e525', '#221cdb', '#e5a43b', '#3be57c', '#92ea3a'],
+  sliceAngle: [{s: 225, e: 270}, {s: 180, e: 225}, {s: 135, e: 180}, {s: 90, e: 135}, {s: 45, e: 90}, {s: 0, e: 45}, {s: 315, e: 360}, {s: 270, e: 315}],
+  sliceLabels: ['italian', 'mexican', 'thai', 'french', 'korean', 'chinese', 'american', 'japanese'],
+  dotColors: ['#92ea3a', '#e83594', '#9530dd', '#f7e525', '#221cdb', '#e5a43b', '#3be57c', '#92ea3a'],
 }
 
-
-
+/*
+** chinese between 0 - 45 degrees
+** korean between 45 - 90 degrees
+** french         90 - 135
+** thai           135 - 180
+** mexican        180 - 225
+** italian        225 - 270
+** japanese       270 - 315
+** american       315 - 360
+*/
 
 const offsetHalfSlice = 360 / (wheelSize * 2)
+const sliceSize = 360 / wheelSize
 const svgEl = document.querySelector('svg');
+const svgBaseEl = document.getElementById('base');
 const canvas = new fabric.Canvas('c');
 
 /*
@@ -116,14 +127,14 @@ function generateDotsAndLabels(n) {
       originX: 'center',
       originY: 'center',
       left: canvas.width/2 + posX ,
-      top: canvas.height/2 + posY
+      top: canvas.height/2 + posY - 30
     });
     let label = new fabric.Text(labels[i].toLocaleUpperCase(), {
       fill: 'white',
       originX: 'center',
       originY: 'center',
       left: canvas.width/2 + posXLabel,
-      top: canvas.height/2 + posYLabel,
+      top: canvas.height/2 + posYLabel - 30,
       angle: i/n * 360 + offsetHalfSlice,
       fontFamily: 'Helvetica',
       fontSize: 12,
@@ -135,47 +146,57 @@ function generateDotsAndLabels(n) {
   return (objs);
 }
 
-let rotate = 3000;
+let rotate = 3000 + Math.random() * 360;
 const onClick = obj => () => {
   obj.animate('angle', rotate, {
     onChange: canvas.renderAll.bind(canvas),
     duration: 6000,
     easing: fabric.util.ease.easeInOutCubic
   });
+
+  angle = rotate % 360
+  config.sliceAngle.forEach((el, i) => {
+    if (angle >= el.s && angle < el.e) {
+      // FABIEN: hook your event here
+      setTimeout(() => console.log('winner is ' + i + ': ' + config.sliceLabels[i]), 6000)
+    }
+  })
   rotate += 1500 + Math.random() * 360 ;
 }
 
 /* circles for the center of the wheel */
 
 const circleInnerOuterWhite = new fabric.Circle({
-  radius: 70, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+  radius: 70, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2 - 30,
 });
 
 const circleInnerBlack = new fabric.Circle({
-  radius: 60, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+  radius: 60, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2 - 30,
 });
 
 const circleInnerWhite = new fabric.Circle({
-  radius: 50, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+  radius: 50, fill: 'white', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2 - 30,
 });
 
 const circleOuterBlack = new fabric.Circle({
-  radius: 242, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2,
+  radius: 266, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2 , top: canvas.height/2 - 30,
 });
 
 const triangle = new fabric.Triangle({
-  width: 30, height: 38, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2, top: 25, angle: 180, stroke: 'white', strokeWidth: 4
+  width: 30, height: 48, fill: 'black', originX: 'center', originY: 'center', left: canvas.width/2, top: 26, angle: 180, stroke: 'white', strokeWidth: 4
 });
 
 /* load wheel svg into fabric */
 
 const serializer = new XMLSerializer();
+
+
 const svgStr = serializer.serializeToString(svgEl);
-const path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
+const path = fabric.loadSVGFromString(svgStr, (objects, options) => {
   const obj = fabric.util.groupSVGElements(objects, options)
-                        .scaleToHeight(canvas.height - 40)
+                        .scaleToHeight(canvas.height - 100)
                         .set({
-                          top: canvas.height / 2,
+                          top: canvas.height / 2 - 30,
                           left: canvas.height / 2,
                           originX: 'center', originY: 'center'});
 
@@ -191,3 +212,17 @@ const path = fabric.loadSVGFromString(svgStr, (objects, options) =>{
   const button = document.getElementById('relance');
   button.addEventListener("click", onClick(motionGroupObj))
 });
+
+/* load wheel base svg into fabric */
+
+fabric.loadSVGFromURL('./untitled.svg', function(objects, options) {
+  console.log(objects)
+  var obj = fabric.util.groupSVGElements(objects, options)
+                        .set({
+                          left: canvas.width / 2 + 14,
+                          top: canvas.height - 34,
+                          originX: 'center', originY: 'center',
+                        })
+                        .scaleToHeight(canvas.height / 8)
+  canvas.add(obj).renderAll();
+})
